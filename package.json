@@ -1,0 +1,45 @@
+{
+  "name": "my-oc-harness",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "my-oc-harness": "bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "agents",
+    "commands",
+    "skills",
+    "reference",
+    "scripts",
+    "AGENTS.md",
+    "opencode.jsonc",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check": "npm pack --dry-run",
+    "test": "node --check bin/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "author": "nathwn12",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nathwn12/my-oc-harness.git"
+  },
+  "description": "Plug-and-play OpenCode harness: MASTER orchestrator, agents, commands, skills, doctor - installed by one explicit command.",
+  "keywords": [
+    "opencode",
+    "harness",
+    "orchestrator",
+    "agents",
+    "skills",
+    "my-oc-harness"
+  ]
+}

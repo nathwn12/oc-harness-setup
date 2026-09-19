@@ -1,0 +1,21 @@
+# OpenCode Model Catalog — example skeleton
+
+Copy or rename this file to `models.md` when you adopt the harness, then fill
+in your own providers and models. The `keeper` maintains it from live evidence
+per `model-keeper.md`; new models enter only through `model-test.md`.
+
+> **Recheck due: YYYY-MM-DD — every 3 days.** Procedure: `model-test.md`.
+> On recheck, move this date +3 days and re-verify the table below.
+
+| # | Model (provider/<id>) | Price in / out / cache-read | Monthly cap | Smart evidence | Cheap evidence | Status |
+|---|-----------------------|-----------------------------|-------------|----------------|----------------|--------|
+| 1 | `<YOUR_MODEL>` | `<in> / <out> / <cache-read>` | `<cap>` | `<benchmark / evidence>` | `<measured cost per turn>` | `<active / beta / ...>` |
+| 2 | `<YOUR_MODEL>` | `<in> / <out> / <cache-read>` | `<cap>` | `<benchmark / evidence>` | `<measured cost per turn>` | `<active / beta / ...>` |
+
+## Notes
+
+- Columns follow the harness ordering: context gate first, then price, cap, and
+  real measured evidence — never vendor claims.
+- The `model:` lines in `agents\*.md` must resolve against this table; the
+  harness doctor's Law 8 enforces it.
+- Rank rows by judgment, not a single formula; state the judgment calls.
