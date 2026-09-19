@@ -1,18 +1,18 @@
-# my-oc-harness
+# oc-harness-setup
 
 Plug-and-play OpenCode harness: MASTER orchestrator, agents, commands, skills, doctor — installed by one explicit command.
 
 ## Install
 
 ```sh
-npx --yes my-oc-harness setup
+npx --yes oc-harness-setup setup
 ```
 
-The installer (`bin/cli.js` — plain Node, zero dependencies) preflights `opencode --version`, finds your config dir, prints an install manifest, backs up your config dir to `<config>.bak-my-oc-harness-<timestamp>`, copies the `agents/` `commands/` `skills/` `reference/` `scripts/` tree plus `AGENTS.md`, merges its `opencode.jsonc` with yours (keeping your `model`, `providers`, `mcp`, `plugins` under the harness base), registers the `oc-flight-deck` plugin, and runs the doctor when PowerShell 7 is present. Everything it writes is journaled with SHA-256 hashes in `<config>/my-oc-harness.manifest.json`; rerunning is safe — identical files are skipped.
+The installer (`bin/cli.js` — plain Node, zero dependencies) preflights `opencode --version`, finds your config dir, prints an install manifest, backs up your config dir to `<config>.bak-oc-harness-setup-<timestamp>`, copies the `agents/` `commands/` `skills/` `reference/` `scripts/` tree plus `AGENTS.md`, merges its `opencode.jsonc` with yours (keeping your `model`, `providers`, `mcp`, `plugins` under the harness base), registers the `oc-flight-deck` plugin, and runs the doctor when PowerShell 7 is present. Everything it writes is journaled with SHA-256 hashes in `<config>/oc-harness-setup.manifest.json`; rerunning is safe — identical files are skipped.
 
-**Where the backup is:** `<config>.bak-my-oc-harness-<timestamp>` (a full recursive copy of your config dir taken before anything is written).
+**Where the backup is:** `<config>.bak-oc-harness-setup-<timestamp>` (a full recursive copy of your config dir taken before anything is written).
 
-**How to undo:** `npx my-oc-harness setup --uninstall` — deletes exactly the manifest-listed files (anything you modified yourself is kept and reported), then prints the path to restore your backup.
+**How to undo:** `npx oc-harness-setup setup --uninstall` — deletes exactly the manifest-listed files (anything you modified yourself is kept and reported), then prints the path to restore your backup.
 
 **Installation never modifies your config by itself — setup is always an explicit command you run.**
 
@@ -40,8 +40,8 @@ The installer (`bin/cli.js` — plain Node, zero dependencies) preflights `openc
 The engine is plain Node — you can't run it without Node. If Node ≥ 22 is available but npm/npx is not (offline mirror, sandbox), clone the repo and run the same engine straight from the checkout — same gates, backup, and journal, no install step:
 
 ```sh
-git clone https://github.com/nathwn12/my-oc-harness.git
-cd my-oc-harness
+git clone https://github.com/nathwn12/oc-harness-setup.git
+cd oc-harness-setup
 node bin/cli.js setup
 ```
 
@@ -59,7 +59,7 @@ npm runs install scripts non-interactively with no consent moment and no uninsta
 
 ## Typosquatting
 
-Install via the exact name `my-oc-harness` (author `nathwn12`, repo `github.com/nathwn12/my-oc-harness`). Verify the package page before running anything you didn't intend to.
+Install via the exact name `oc-harness-setup` (author `nathwn12`, repo `github.com/nathwn12/oc-harness-setup`). Verify the package page before running anything you didn't intend to.
 
 ## License
 

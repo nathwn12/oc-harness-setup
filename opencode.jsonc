@@ -1,9 +1,9 @@
 {
-  // my-oc-harness base config: stable runtime policy lives here; behavior
+  // oc-harness-setup base config: stable runtime policy lives here; behavior
   // lives beside it in agents/, commands/, skills/, and reference/ for
   // smaller, hot-reloadable artifacts. Skill loading is fail-closed to local IDs.
   //
-  // This is the my-oc-harness base config; the installer preserves your
+  // This is the oc-harness-setup base config; the installer preserves your
   // model/providers/mcp/plugins.
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "master",

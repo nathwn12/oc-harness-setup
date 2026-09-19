@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * my-oc-harness — installer engine. Pure Node ESM, stdlib only, ZERO dependencies.
+ * oc-harness-setup — installer engine. Pure Node ESM, stdlib only, ZERO dependencies.
  *
  * Subcommands / flags:
  *   setup                 full install (default when no args)
@@ -22,9 +22,9 @@ import { homedir } from 'node:os';
 import path from 'node:path';
 import { createInterface } from 'node:readline/promises';
 
-const PKG_NAME = 'my-oc-harness';
+const PKG_NAME = 'oc-harness-setup';
 const PKG_ROOT = path.resolve(import.meta.dirname, '..');
-const MANIFEST_FILE = 'my-oc-harness.manifest.json';
+const MANIFEST_FILE = 'oc-harness-setup.manifest.json';
 const COPY_DIRS = ['agents', 'commands', 'skills', 'reference', 'scripts'];
 const COPY_FILES = ['AGENTS.md'];
 const MERGE_KEYS = ['model', 'providers', 'mcp', 'plugins'];
@@ -37,14 +37,14 @@ function log(label, msg) {
 }
 
 function usage() {
-  console.log(`my-oc-harness — install the OpenCode harness into your config dir.
+  console.log(`oc-harness-setup — install the OpenCode harness into your config dir.
 
 usage:
-  my-oc-harness setup                full install (default: no args needed)
-  my-oc-harness --dry-run            print the manifest only; touch nothing
-  my-oc-harness --ci                 print-only, refuse to mutate, exit 0
-  my-oc-harness setup --uninstall    remove exactly the manifest-listed files
-  my-oc-harness setup --fleet        also register plugin oc-freedom-fleet`);
+  oc-harness-setup setup                full install (default: no args needed)
+  oc-harness-setup --dry-run            print the manifest only; touch nothing
+  oc-harness-setup --ci                 print-only, refuse to mutate, exit 0
+  oc-harness-setup setup --uninstall    remove exactly the manifest-listed files
+  oc-harness-setup setup --fleet        also register plugin oc-freedom-fleet`);
 }
 
 class Bail extends Error {}
@@ -199,7 +199,7 @@ function collectIncoming(configDir) {
 /* -------------------------------- backup ----------------------------------- */
 
 function makeBackup(configDir) {
-  const backupPath = `${configDir}.bak-my-oc-harness-${tsStamp()}`;
+  const backupPath = `${configDir}.bak-oc-harness-setup-${tsStamp()}`;
   if (existsSync(configDir)) {
     if (!statSync(configDir).isDirectory()) {
       bail(`${configDir} exists but is not a directory — refusing to install over it`);
@@ -231,7 +231,7 @@ function stageFiles(files, manifest) {
     }
     if (action === 'written') {
       mkdirSync(path.dirname(f.dest), { recursive: true });
-      const tmp = `${f.dest}.my-oc-harness-tmp-${process.pid}`;
+      const tmp = `${f.dest}.oc-harness-setup-tmp-${process.pid}`;
       writeFileSync(tmp, readFileSync(f.src));
       rmSync(f.dest, { force: true }); // Windows rename() cannot overwrite
       renameSync(tmp, f.dest);
@@ -355,7 +355,7 @@ function mergeJsonc(configDir, backupPath, manifest) {
   }
   const out = `${JSON.stringify(merged, null, 2)}\n`;
   mkdirSync(configDir, { recursive: true });
-  const tmp = `${userPath}.my-oc-harness-tmp-${process.pid}`;
+  const tmp = `${userPath}.oc-harness-setup-tmp-${process.pid}`;
   writeFileSync(tmp, out);
   rmSync(userPath, { force: true });
   renameSync(tmp, userPath);
@@ -528,7 +528,7 @@ async function setup(opts) {
   preflight();
   const configDir = findConfigDir();
   const files = collectIncoming(configDir);
-  const backupPath = `${configDir}.bak-my-oc-harness-${tsStamp()}`;
+  const backupPath = `${configDir}.bak-oc-harness-setup-${tsStamp()}`;
   const doctor = doctorPlan(); // read-only probe
   printManifest(configDir, files, backupPath, opts.fleet, doctor);
 
@@ -582,7 +582,7 @@ async function setup(opts) {
   console.log('  installed: agents/, commands/, skills/, reference/, scripts/, AGENTS.md + merged opencode.jsonc');
   console.log(`  plugins  : oc-flight-deck${opts.fleet ? ', oc-freedom-fleet' : ''}`);
   console.log(`  backup   : ${backup}`);
-  console.log('  undo     : npx my-oc-harness setup --uninstall');
+  console.log('  undo     : npx oc-harness-setup setup --uninstall');
   console.log('  restart  : restart your OpenCode session so the new agents/commands/skills load.');
   console.log('----------------------------------------------------------------------------');
   return 0;

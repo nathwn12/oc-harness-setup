@@ -1,9 +1,9 @@
 {
-  "name": "my-oc-harness",
+  "name": "oc-harness-setup",
   "version": "0.1.0",
   "type": "module",
   "bin": {
-    "my-oc-harness": "bin/cli.js"
+    "oc-harness-setup": "bin/cli.js"
   },
   "files": [
     "bin",
@@ -31,7 +31,7 @@
   "author": "nathwn12",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nathwn12/my-oc-harness.git"
+    "url": "https://github.com/nathwn12/oc-harness-setup.git"
   },
   "description": "Plug-and-play OpenCode harness: MASTER orchestrator, agents, commands, skills, doctor - installed by one explicit command.",
   "keywords": [
@@ -40,6 +40,6 @@
     "orchestrator",
     "agents",
     "skills",
-    "my-oc-harness"
+    "oc-harness-setup"
   ]
 }
