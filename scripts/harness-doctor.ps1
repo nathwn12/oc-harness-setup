@@ -218,7 +218,7 @@ function Get-RegistryMcpNames {
         $text = ([string]$line).Trim().TrimStart([char[]]@([char]0x2713, [char]0x2717, [char]0x00D7, [char]0x2022, [char]0x002D, [char]0x0020))
         if ([string]::IsNullOrWhiteSpace($text)) { continue }
         $name = @($text -split '\s+' | Where-Object { $_ -ne '' })[0]
-        if ($name -and $name -notmatch '(?i)^(id|name|server|status)$') { $names.Add([string]$name) }
+        if ($name -and $name -notmatch '(?i)^(id|name|server|status|no)$') { $names.Add([string]$name) }
     }
     return [System.Collections.Generic.List[string]]::new([string[]](@($names | Sort-Object -Unique)))
 }
@@ -522,6 +522,13 @@ if (-not $configOk) {
 }
 
 # Law 7: configured MCP servers match the registry in BOTH directions.
+# Registered-but-undeclared servers are machine-global: `opencode mcp list`
+# always merges the default global config (OPENCODE_CONFIG_DIR does not
+# override it), so a harness config that declares no mcp at all reports them
+# as a PASS note, not a regression — a fresh install cannot adopt servers it
+# never declared. Any DECLARED server must register: that direction stays
+# fail-closed, and a config that declares at least one server is graded in
+# both directions.
 if (-not $configOk) {
     Add-ConfigDrift 'configured MCP servers match the registry both directions'
 } elseif (-not $cli) {
@@ -532,18 +539,22 @@ if (-not $configOk) {
         Add-Law 'configured MCP servers match the registry both directions' 'DRIFT' "opencode mcp list exited $($mcpRun.Exit)" "re-run `opencode mcp list` by hand: $($mcpRun.Lines -join ' ')"
     } else {
         $mcpNoServers = ((($mcpRun.Lines -join "`n") -match 'No MCP servers configured'))
-        $registryNames = @(Get-RegistryMcpNames -Lines $mcpRun.Lines)
+        $registryNames = @()
+        if (-not $mcpNoServers) { $registryNames = @(Get-RegistryMcpNames -Lines $mcpRun.Lines) }
         $mcpProblems = [System.Collections.Generic.List[string]]::new()
         foreach ($name in $configuredMcp) {
             if ($registryNames -notcontains $name) { $mcpProblems.Add("declared server '$name' is not registered") }
         }
-        foreach ($name in $registryNames) {
-            if ($configuredMcp -notcontains $name) { $mcpProblems.Add("registered server '$name' is not declared in opencode.jsonc") }
-        }
         if ($mcpNoServers -and $configuredMcp.Count -gt 0) { $mcpProblems.Add("declared MCP servers are not registered: $($configuredMcp -join ', ')") }
+        $undeclaredRegistrations = @($registryNames | Where-Object { $configuredMcp -notcontains $_ })
+        if ($undeclaredRegistrations.Count -gt 0 -and $configuredMcp.Count -gt 0) {
+            $mcpProblems.Add("registered servers not declared in opencode.jsonc: $($undeclaredRegistrations -join ', ')")
+        }
         if ($mcpProblems.Count -gt 0) {
             Add-Law 'configured MCP servers match the registry both directions' 'FAIL' ($mcpProblems -join '; ') `
                 "run from $root (project configs in cwd merge into the registry); then reconcile the mcp block in opencode.jsonc with ``opencode mcp list`` (see <EVIDENCE_ARCHIVE>\.docs\playwright-mcp-browser-tool.md): $($mcpProblems -join '; ')"
+        } elseif ($undeclaredRegistrations.Count -gt 0) {
+            Add-Law 'configured MCP servers match the registry both directions' 'PASS' "no MCP servers declared in opencode.jsonc; the registry reports machine-global servers it has not adopted: $($undeclaredRegistrations -join ', ') (add an mcp block to adopt them)"
         } else {
             $mcpDetail = if ($registryNames.Count -eq 0) { 'no MCP servers declared or registered' } else { "declared and registered agree: $($registryNames -join ', ')" }
             Add-Law 'configured MCP servers match the registry both directions' 'PASS' $mcpDetail
