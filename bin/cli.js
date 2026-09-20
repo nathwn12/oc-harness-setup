@@ -566,6 +566,11 @@ async function setup(opts) {
   };
 
   stageFiles(files, manifest);
+  // Register plugins BEFORE the merge: on a fresh dir `opencode plugin add`
+  // installs the plugin, but once the merged opencode.jsonc lists it, add
+  // no-ops with "already configured" and nothing lands in `opencode plugin
+  // list` — the doctor's Law 6 grades exactly that list.
+  registerPlugins();
   mergeJsonc(configDir, backup, manifest);
 
   const hits = lintCopiedFiles([
@@ -584,7 +589,6 @@ async function setup(opts) {
   writeManifest(configDir, manifest);
   log('manifest', `journal written: ${path.join(configDir, MANIFEST_FILE)}`);
 
-  registerPlugins();
   const doctorOk = runDoctor(configDir);
   if (doctorOk !== 0) return 1;
 
