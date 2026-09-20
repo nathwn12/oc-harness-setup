@@ -54,8 +54,6 @@ flowchart LR
 
 > Strict deny-set permissions that survive `--auto` · skills fail closed on unknown IDs · credentials stay by pointer · backup before any change.
 
-**Optional add-on:** [`oc-freedom-fleet`](https://github.com/nathwn12/oc-freedom-fleet) — typed JEV sidecar + free-model lanes.
-
 ---
 
 <div align="center">

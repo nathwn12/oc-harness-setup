@@ -64,12 +64,21 @@
 
 .EXAMPLE
   pwsh -File scripts\harness-doctor.ps1 -Json
+
+.EXAMPLE
+  pwsh -File scripts\harness-doctor.ps1 -ConfigDir D:\config\opencode
+
+.PARAMETER ConfigDir
+  Config directory to grade. The installer passes the resolved config dir
+  (OPENCODE_CONFIG_DIR and cross-platform paths included); standalone runs
+  without it default to ~\.config\opencode.
 #>
 #Requires -Version 7.0
 [CmdletBinding()]
 param(
     [switch]$Fix,
-    [switch]$Json
+    [switch]$Json,
+    [string]$ConfigDir
 )
 
 $ErrorActionPreference = 'Stop'
@@ -77,7 +86,7 @@ Set-StrictMode -Version Latest
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-$root = Join-Path $env:USERPROFILE '.config\opencode'
+$root = if ($ConfigDir) { $ConfigDir } else { Join-Path $env:USERPROFILE '.config\opencode' }
 
 # ---------- declared values (each names its evidence) ----------
 # Required layout paths. Evidence: the harness shape itself (opencode.jsonc

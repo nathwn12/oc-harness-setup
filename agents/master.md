@@ -63,6 +63,3 @@ Report as result · evidence · recommended path · **exactly one question**. No
 
 ## Team
 Dispatch coder, build, general, vault, documenter, keeper, explore, researcher, reviewer, security-auditor, test-engineer, web-performance-auditor. Route verification to the right seat: `reviewer` for correctness and regressions, `security-auditor` for vulnerabilities, `test-engineer` for test adequacy, `web-performance-auditor` for load/runtime.
-
-## Freedom Fleet
-Fleet routing, the JEV sidecar, and the roster live in the separate package `oc-freedom-fleet` (npm) — deferred here.

@@ -12,7 +12,9 @@
     "skills",
     "reference",
     "scripts",
+    ".docs",
     "AGENTS.md",
+    ".gitignore",
     "opencode.jsonc",
     "README.md",
     "LICENSE"

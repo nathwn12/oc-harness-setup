@@ -8,7 +8,6 @@
  *   --ci                  refuse to mutate: print the manifest, exit 0
  *   setup --uninstall     delete exactly the manifest-listed files, keep
  *                         user-modified ones, print the backup restore path
- *   --fleet               also register the oc-freedom-fleet plugin
  *
  * Exit codes are strictly 0 (ok / clean abort) or 1 (failure).
  */
@@ -25,8 +24,8 @@ import { createInterface } from 'node:readline/promises';
 const PKG_NAME = 'oc-harness-setup';
 const PKG_ROOT = path.resolve(import.meta.dirname, '..');
 const MANIFEST_FILE = 'oc-harness-setup.manifest.json';
-const COPY_DIRS = ['agents', 'commands', 'skills', 'reference', 'scripts'];
-const COPY_FILES = ['AGENTS.md'];
+const COPY_DIRS = ['agents', 'commands', 'skills', 'reference', 'scripts', '.docs'];
+const COPY_FILES = ['AGENTS.md', '.gitignore'];
 const MERGE_KEYS = ['model', 'providers', 'mcp', 'plugins'];
 const LINT_PATTERNS = ['c:\\users', 'q:\\', 'nathan', 'ses_', '.secrets'];
 
@@ -43,8 +42,7 @@ usage:
   oc-harness-setup setup                full install (default: no args needed)
   oc-harness-setup --dry-run            print the manifest only; touch nothing
   oc-harness-setup --ci                 print-only, refuse to mutate, exit 0
-  oc-harness-setup setup --uninstall    remove exactly the manifest-listed files
-  oc-harness-setup setup --fleet        also register plugin oc-freedom-fleet`);
+  oc-harness-setup setup --uninstall    remove exactly the manifest-listed files`);
 }
 
 class Bail extends Error {}
@@ -353,7 +351,17 @@ function mergeJsonc(configDir, backupPath, manifest) {
   } else {
     log('merge', 'no existing opencode.jsonc — writing the harness base');
   }
-  const out = `${JSON.stringify(merged, null, 2)}\n`;
+  // JSON.stringify strips comments, including the marker the doctor's Law 11
+  // cites as evidence — reinsert it so the merged file still documents the
+  // deny gate (the law grades the rules; the marker keeps its cited evidence).
+  const denyEvidence =
+    '  // Hard stops. `ask` is auto-approved under --auto, so `deny` is the only gate\n' +
+    '  // that holds while you are away. Keep this set minimal and last.\n';
+  const mergedText = JSON.stringify(merged, null, 2).replace(
+    '  "permissions": [\n',
+    `  "permissions": [\n${denyEvidence}`
+  );
+  const out = `${mergedText}\n`;
   mkdirSync(configDir, { recursive: true });
   const tmp = `${userPath}.oc-harness-setup-tmp-${process.pid}`;
   writeFileSync(tmp, out);
@@ -382,8 +390,8 @@ function lintCopiedFiles(files) {
 
 /* ------------------------------- plugin gate ------------------------------- */
 
-function registerPlugins(fleet) {
-  const list = ['oc-flight-deck', ...(fleet ? ['oc-freedom-fleet'] : [])];
+function registerPlugins() {
+  const list = ['oc-flight-deck'];
   for (const p of list) {
     log('plugin', `opencode plugin add ${p}`);
     const res = exec('opencode', ['plugin', 'add', p], false);
@@ -423,7 +431,7 @@ function runDoctor(configDir) {
     return 0;
   }
   log('doctor', `running ${script}`);
-  const res = exec('pwsh', ['-NoProfile', '-File', script], false);
+  const res = exec('pwsh', ['-NoProfile', '-File', script, '-ConfigDir', configDir], false);
   if (res.error || res.status !== 0) {
     log(
       'doctor',
@@ -437,7 +445,7 @@ function runDoctor(configDir) {
 
 /* --------------------------- manifest print (gate) ------------------------- */
 
-function printManifest(configDir, files, backupPath, fleet, doctor) {
+function printManifest(configDir, files, backupPath, doctor) {
   const newCount = files.filter((f) => !existsSync(f.dest)).length;
   const sameCount = files.length - newCount;
   console.log('----------------------------- install manifest -----------------------------');
@@ -447,7 +455,7 @@ function printManifest(configDir, files, backupPath, fleet, doctor) {
   console.log('  opencode.jsonc merge   : distro base (permissions/deny block, skill allowlist,');
   console.log('                            default_agent: "master", references registry)');
   console.log(`                            + your keys re-injected: ${MERGE_KEYS.join(', ')}`);
-  console.log(`  plugin registration    : oc-flight-deck${fleet ? ' + oc-freedom-fleet' : ''} (via 'opencode plugin add')`);
+  console.log('  plugin registration    : oc-flight-deck (via \'opencode plugin add\')');
   console.log(`  doctor plan            : ${doctor}`);
   console.log('----------------------------------------------------------------------------');
 }
@@ -530,7 +538,7 @@ async function setup(opts) {
   const files = collectIncoming(configDir);
   const backupPath = `${configDir}.bak-oc-harness-setup-${tsStamp()}`;
   const doctor = doctorPlan(); // read-only probe
-  printManifest(configDir, files, backupPath, opts.fleet, doctor);
+  printManifest(configDir, files, backupPath, doctor);
 
   if (opts.dryRun) {
     console.log('[dry-run] manifest only — nothing was touched.');
@@ -553,14 +561,17 @@ async function setup(opts) {
     created: new Date().toISOString(),
     configDir,
     backupPath: backup,
-    plugins: ['oc-flight-deck', ...(opts.fleet ? ['oc-freedom-fleet'] : [])],
+    plugins: ['oc-flight-deck'],
     files: [],
   };
 
   stageFiles(files, manifest);
   mergeJsonc(configDir, backup, manifest);
 
-  const hits = lintCopiedFiles(files);
+  const hits = lintCopiedFiles([
+    ...files,
+    { rel: 'opencode.jsonc (merged)', dest: path.join(configDir, 'opencode.jsonc') },
+  ]);
   if (hits.length) {
     // Journal first — uninstall must know exactly what landed.
     writeManifest(configDir, manifest);
@@ -573,14 +584,14 @@ async function setup(opts) {
   writeManifest(configDir, manifest);
   log('manifest', `journal written: ${path.join(configDir, MANIFEST_FILE)}`);
 
-  registerPlugins(opts.fleet);
+  registerPlugins();
   const doctorOk = runDoctor(configDir);
   if (doctorOk !== 0) return 1;
 
   console.log();
   console.log('-------------------------------- summary ---------------------------------');
   console.log('  installed: agents/, commands/, skills/, reference/, scripts/, AGENTS.md + merged opencode.jsonc');
-  console.log(`  plugins  : oc-flight-deck${opts.fleet ? ', oc-freedom-fleet' : ''}`);
+  console.log('  plugins  : oc-flight-deck');
   console.log(`  backup   : ${backup}`);
   console.log('  undo     : npx oc-harness-setup setup --uninstall');
   console.log('  restart  : restart your OpenCode session so the new agents/commands/skills load.');
@@ -591,7 +602,7 @@ async function setup(opts) {
 /* --------------------------------- entry ---------------------------------- */
 
 function parseArgs(argv) {
-  const opts = { command: 'setup', dryRun: false, ci: false, uninstall: false, fleet: false };
+  const opts = { command: 'setup', dryRun: false, ci: false, uninstall: false };
   for (const a of argv) {
     switch (a) {
       case 'setup':
@@ -605,9 +616,6 @@ function parseArgs(argv) {
         break;
       case '--uninstall':
         opts.uninstall = true;
-        break;
-      case '--fleet':
-        opts.fleet = true;
         break;
       case '--help':
       case '-h':
