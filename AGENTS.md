@@ -98,9 +98,9 @@ Understand the real flow first, then stop at the first rung that holds — in or
 - The lead owns the directory and hands helpers the path. `/checkpoint` and `/handoff` write these on demand.
 
 ## Routing
-- Model bindings live in `~/.config/opencode/agents/*.md`; the catalog skeleton lives in `~/.config/opencode/reference/models.md.example`, maintained per `~/.config/opencode/reference/model-keeper.md` via `/keeper`. Keep model names out of prose.
-- Routing is unwired: all 14 agents have their `model:` line commented (`# model: …`), so each inherits the session's selected model; `reference/models.md.example` retains the binding list as the commented-suggestion map. When the selected model hits its monthly cap, follow the Caps & fallback order in `reference/models.md.example` rather than inventing a substitute.
-- Recheck nudge: `reference/models.md.example` carries a recheck-due date (every 3 days). When a session opens past due, surface it before giving model advice.
+- Model bindings live in `~/.config/opencode/agents/*.md`; the catalog skeleton lives in `~/.config/opencode/reference/models.md`, maintained per `~/.config/opencode/reference/model-keeper.md` via `/keeper`. Keep model names out of prose.
+- Routing is unwired: all 14 agents have their `model:` line commented (`# model: …`), so each inherits the session's selected model; `reference/models.md` retains the binding list as the commented-suggestion map. When the selected model hits its monthly cap, follow the Caps & fallback order in `reference/models.md` rather than inventing a substitute.
+- Recheck nudge: `reference/models.md` carries a recheck-due date (every 3 days). When a session opens past due, surface it before giving model advice.
 
 ## Team
 - `master` (default) is the grand orchestrator and sole user-facing assistant; it triages to a dispatch tier, dispatches helpers, reduces their reports, and closes with a recommendation and one question. `build` implements; `plan` plans; spawn `coder`, `explore`, `researcher`, `general`, `reviewer`, `documenter`, `keeper`, `vault` (secret-file handling and OpenCode account switching).

@@ -23,16 +23,16 @@ npx --yes oc-harness-setup setup
 
 ## 🔧 What setup does
 
-```mermaid
-flowchart LR
-    A["⚡ preflight"] --> B["🔍 locate config"] --> C["🤝 consent gate"] --> D["💾 backup"] --> E["📦 install"] --> F["🩺 verify"]
+```text
+preflight -> locate config -> consent gate -> backup -> install -> verify
 ```
 
 - **Consent first** — the full manifest prints before anything moves; `--dry-run` shows it without touching a file
-- **Your config survives** — `model`, providers, MCP, and plugins are preserved; everything else is curated
-- **Reversible** — a SHA-256 journal records every touched file; `--uninstall` removes exactly those
+- **Your config survives** — the installer owns runtime policy (`$schema`, `default_agent`, `compaction`, `tool_output`, `media`, `watcher`), unions your `plugins` and `references` with the harness's, and preserves every other top-level key, known or unknown — `provider`, `model`, `agents`, `commands`, `skills`, `mcp`, or a key of your own
+- **Your `permissions` still apply** — your rules are placed after the harness's allow/ask rules and ahead of its hard denies, so a rule of yours beats a harness allow while the hard denies stay last
+- **Reversible** — a SHA-256 journal records every touched file; `--uninstall` removes the files the installer created and restores any file it overwrote from the pre-install backup (its path is printed before anything moves). Post-install edits to a restored file are copied aside first as `<name>.replaced-<ts>` — never destroyed
 - **Idempotent** — re-run anytime; identical files are skipped
-- **Verified** — ends on the harness's own 16-law doctor; red = nonzero exit with the file:line that explains it
+- **Verified** — ends on the harness's own 16-law doctor; red = nonzero exit with the file:line that explains it. The doctor needs PowerShell 7: if it is missing, the laws are **skipped** and reported as skipped — not passed
 
 > *Installation never modifies your config by itself — setup is always an explicit command you run. **No postinstall, ever.***
 
@@ -40,13 +40,13 @@ flowchart LR
 
 ## 📦 What you get
 
-| | | |
-|:---|:---|:---|
-| 🧠 **MASTER** | dispatch tiers, parallel waves, fan-in reduction, one question per close | |
-| 🤖 **14 agents** | coder · explore · reviewer · security-auditor · vault (secrets by pointer) · … | |
-| ⌨️ **14 commands** | doctor · council · keeper · checkpoint · plan · build · review · ship · … | |
-| 🧪 **18 skills** | spec-driven dev · TDD · debugging · security · performance · git ceremony · … | |
-| 🩺 **The doctor** | 16 self-derived laws; green = consistent, regressions ≠ drift | |
+| Component | What it gives you |
+|:---|:---|
+| 🧠 **MASTER** | dispatch tiers, parallel waves, fan-in reduction, one question per close |
+| 🤖 **14 agents** | coder · explore · reviewer · security-auditor · vault (secrets by pointer) · … |
+| ⌨️ **14 commands** | doctor · council · keeper · checkpoint · plan · build · review · ship · … |
+| 🧪 **18 skills** | spec-driven dev · TDD · debugging · security · performance · git ceremony · … |
+| 🩺 **The doctor** | 16 self-derived laws; green = consistent, regressions ≠ drift |
 
 ---
 

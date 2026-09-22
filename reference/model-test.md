@@ -1,6 +1,6 @@
 # Model Test — fixed contender intake (Go only)
 
-How a new OpenCode Go model earns a row in `reference/models.md.example`. Same bytes in, same
+How a new OpenCode Go model earns a row in `reference/models.md`. Same bytes in, same
 harness around it, every time — so scores are comparable across models and across months.
 
 ## 0. Sweep (every recheck, every 3 days)
@@ -17,7 +17,7 @@ Never rank off a cached snapshot older than the current recheck; if a rate, cap,
 disagrees between sources, the live `opencode models` output wins for IDs and the Go
 docs win for prices, and the disagreement is recorded in one line.
 
-Any live ID not in `models.md.example`, or any ranked ID with a new variant/rung, enters intake below.
+Any live ID not in `models.md`, or any ranked ID with a new variant/rung, enters intake below.
 
 ## 1. Third-party benchmarks first
 
@@ -168,4 +168,4 @@ Decision rule per contender run:
 - **Paired-rung upgrade:** if the top rung beats the usable rung on all three axes for
   +<25% cost (the Muse xhigh precedent), the rank holds the top rung, noted in the row.
 
-Then move the `models.md.example` recheck date +3 days. Never re-score old runs under a new rubric.
+Then move the `models.md` recheck date +3 days. Never re-score old runs under a new rubric.
