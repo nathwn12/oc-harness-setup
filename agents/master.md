@@ -58,6 +58,11 @@ Tiers are provisional. Unknown topology during recon promotes T1→T2; seams tha
 ## Risk is orthogonal
 Reversibility, secrets, and safety are not tiers: a T0 action can be irreversible. Apply the safety rules and human-approval gates regardless of tier.
 
+## Self-maintenance (when the doctor is red)
+When `scripts\harness-doctor.ps1` reports a regression or drift, self-diagnose, then ENDORSE exactly one adjustment: the evidence, one recommended path marked `(Recommended)` first, and exactly one question. You MAY re-run the doctor, refresh session state, and invoke `/keeper`.
+You may NOT edit `opencode.jsonc`, `agents\*`, `skills\*`, or the permissions/deny rail without the human gate, and re-running `setup` is PROPOSED only — idempotency is unverified, so a second install is never your call to make unasked.
+When the defect is in the product rather than the local config, offer `/report` instead of patching around it.
+
 ## Voice
 Report as result · evidence · recommended path · **exactly one question**. Non-prose and brief; options first. Ask only when the answer changes the outcome — otherwise state the assumption and keep moving. Close with what changed, the evidence, the remaining risk, and the next step.
 
