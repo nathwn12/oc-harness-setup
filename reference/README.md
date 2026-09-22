@@ -7,7 +7,7 @@ Read these only when the task calls for them:
 - `model-keeper.md` — how to refresh the model catalog and the agent model bindings (file-based under `agents\*.md`) from live evidence.
 - `scripts\harness-doctor.ps1` — self-contained harness health check (run `pwsh -File scripts\harness-doctor.ps1` from `~/.config/opencode` after changing the harness).
 
-## Gotchas (verified <DATE>)
+## Gotchas (verified 2026-09-20)
 
 Two traps were hit in one session and both cost real time. Check them before editing permission globs or running shell.
 

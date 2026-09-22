@@ -14,5 +14,6 @@ From `~/.config/opencode`, run `pwsh -File scripts\harness-doctor.ps1` and repor
   - Law 14 skill-allowlist set equality: allow entries and local skill IDs agree in both directions.
   - Law 15 agent/command frontmatter: `agents/*.md` carry description+steps, `commands/*.md` carry description.
   - Law 16 skill-loadable: every skill directory carries a `SKILL.md` with name+description and no YAML-breaking plain scalar.
+- On a real regression or drift, recommend `/report` as the next action: it runs `scripts\harness-report.ps1` and returns a redacted, prefilled issue URL for the product repo. The doctor itself still writes nothing; `/report` also writes nothing by default - it prints the redacted body and the prefilled URL to the console, and only a run that passes `-OutFile <path>` writes that body to disk. Nothing is filed unless the human submits it.
 
 Close with: verdict (clean / drift / real regression), the exact commands run, files changed (normally none), and the next action.
