@@ -5,7 +5,7 @@
 **The whole harness in one command.**
 *MASTER orchestrator · 14 agents · 14 commands · 18 skills · a doctor that proves it.*
 
-![npm](https://img.shields.io/npm/v/oc-harness-setup) ![license](https://img.shields.io/badge/license-MIT-blue) ![opencode](https://img.shields.io/badge/opencode-V2-compatible-8A2BE2) ![node](https://img.shields.io/badge/node-%E2%89%A522-green)
+![npm](https://img.shields.io/npm/v/oc-harness-setup) ![license](https://img.shields.io/badge/license-MIT-blue) ![node](https://img.shields.io/badge/node-%E2%89%A522-green) ![downloads](https://img.shields.io/npm/dm/oc-harness-setup)
 
 </div>
 
