@@ -32,7 +32,7 @@ preflight -> locate config -> consent gate -> backup -> install -> verify
 - **Your `permissions` still apply** - your rules are placed after the harness's allow/ask rules and ahead of its hard denies, so a rule of yours beats a harness allow while the hard denies stay last
 - **Reversible** - a SHA-256 journal records every touched file; `--uninstall` removes the files the installer created and restores any file it overwrote from the pre-install backup (its path is printed before anything moves). Post-install edits to a restored file are copied aside first as `<name>.replaced-<ts>` - never destroyed
 - **Idempotent** - re-run anytime; identical files are skipped
-- **Verified** - ends on the harness's own 16-law doctor; red = nonzero exit with the file:line that explains it. The doctor needs PowerShell 7: if it is missing, the laws are **skipped** and reported as skipped - not passed
+- **Verified** - ends on the harness's own 16-law doctor; red = nonzero exit, with every failing law naming the check, the detail, and a proposed fix. The doctor needs PowerShell 7: if it is missing, the laws are **skipped** and reported as skipped - not passed
 
 > *Installation never modifies your config by itself - setup is always an explicit command you run. **No postinstall, ever.***
 
@@ -44,9 +44,9 @@ preflight -> locate config -> consent gate -> backup -> install -> verify
 |:---|:---|
 | 🧠 **Orchestrator** | dispatch tiers, parallel waves, fan-in reduction, one question per close |
 | 🤖 **7 agents** | orchestrator . plan . build . explore . general . reviewer . vault (secrets by pointer) |
-| ⌨️ **14 commands** | doctor . kill . keeper . ship . gauntlet . checkpoint . plan . build . review . ... |
+| ⌨️ **14 commands** | build . checkpoint . code-simplify . gauntlet . handoff . keeper . kill . plan . retro . review . ship . spec . test . webperf |
 | 🧪 **20 skills** | git ceremony . TDD . debugging . security . performance . test-flight . flight-deck . ... |
-| 🩺 **The doctor** | 16 self-derived laws; green = consistent, regressions != drift |
+| 🩺 **The doctor** | 16 self-derived laws; green = consistent, regressions != drift (runs as an installer-integrated gate, not a command) |
 
 ---
 
@@ -56,7 +56,7 @@ preflight -> locate config -> consent gate -> backup -> install -> verify
 
 ### Policy
 
-This package ships a **fail-closed permission set**: the disk-destroy and credential denies hold even under `--auto`, and skills load only from an exact allowlist - an unknown skill ID is denied, not loaded. The author's own live harness runs permission-free; the guardrails here are intentional, kept for adopters who want the safety net. Rogue-session and housekeeping machinery ships too: `/kill` (with `scripts/interrupt-session.ps1`) stops a runaway session, and `scripts/gc-clean.ps1` sweeps junk with a dry-run default. Adopters who prefer the author's freer setup can relax or remove the deny block after install - the installer's merge never re-adds keys you remove.
+This package ships a **fail-closed permission set**: the disk-destroy and credential denies hold even under `--auto`, and skills load only from an exact allowlist - an unknown skill ID is denied, not loaded. The author's own live harness runs permission-free; the guardrails here are intentional, kept for adopters who want the safety net. Rogue-session and housekeeping machinery ships too: `/kill` (with `scripts/interrupt-session.ps1`) stops a runaway session, and `scripts/gc-clean.ps1` sweeps junk with a dry-run default. Adopters who prefer the author's freer setup can relax or remove the deny entries in the merged opencode.jsonc, with one caveat: the installer's merge re-applies the harness's deny entries on every install run - the deny tail is always placed after your rules, and under last-match-wins a re-added deny outranks any relaxation you added. To keep relaxed permissions, remove the deny entries from the merged opencode.jsonc and do not re-run setup afterwards.
 
 ---
 

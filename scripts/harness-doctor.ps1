@@ -102,14 +102,14 @@ $requiredPaths = @(
 )
 
 # Legacy / remote-catalog top-level keys that must not appear in opencode.jsonc.
-# Evidence: <EVIDENCE_ARCHIVE>\.docs\harness-plugin-allowlist.md (the "no remote skill-catalog
-# keys" file check). 'plugins' and 'mcp' are legitimate config and are NOT here.
+# Evidence: the package's own .docs (the "no remote skill-catalog keys" file check).
+# 'plugins' and 'mcp' are legitimate config and are NOT here.
 $remoteCatalogKeys = @('plugin', 'mcpServers', 'mcp_servers', 'skill_catalog', 'skills_catalog', 'remote_skills', 'skills_remote')
 
 # Deny gates that must hold as effect=deny (ask is auto-approved under --auto,
 # so only deny survives). Evidence: the opencode.jsonc inline policy comment
-# ("deny is the only gate that holds while you are away"; same text in
-# <EVIDENCE_ARCHIVE>\.docs\opencode.jsonc.bak-20260915-pre-harness-guard-removal). Verification is
+# ("deny is the only gate that holds while you are away"; same text in the package's
+# own .docs). Verification is
 # derived: each gate needs a matching deny rule in the live permissions array.
 $denyGates = @(
     @{ Action = 'shell';              Contains = 'Format-Volume' },
@@ -429,7 +429,7 @@ if ($configOk) {
         Add-Law 'no legacy remote-catalog keys in opencode.jsonc' 'PASS' 'no plugin/mcpServers/skill-catalog keys; plugins[] and mcp come from config + registry only'
     } else {
         Add-Law 'no legacy remote-catalog keys in opencode.jsonc' 'FAIL' "legacy keys present: $($badKeys -join ', ')" `
-            "remove these keys from opencode.jsonc ($($badKeys -join ', ')) — see <EVIDENCE_ARCHIVE>\.docs\harness-plugin-allowlist.md"
+            "remove these keys from opencode.jsonc ($($badKeys -join ', ')) — see the package's own .docs"
     }
 } else {
     Add-ConfigDrift 'no legacy remote-catalog keys in opencode.jsonc'
@@ -554,7 +554,7 @@ if (-not $configOk) {
         }
         if ($mcpProblems.Count -gt 0) {
             Add-Law 'configured MCP servers match the registry both directions' 'FAIL' ($mcpProblems -join '; ') `
-                "run from $root (project configs in cwd merge into the registry); then reconcile the mcp block in opencode.jsonc with ``opencode mcp list`` (see <EVIDENCE_ARCHIVE>\.docs\playwright-mcp-browser-tool.md): $($mcpProblems -join '; ')"
+                "run from $root (project configs in cwd merge into the registry); then reconcile the mcp block in opencode.jsonc with ``opencode mcp list`` (see the package's own .docs): $($mcpProblems -join '; ')"
         } elseif ($undeclaredRegistrations.Count -gt 0) {
             Add-Law 'configured MCP servers match the registry both directions' 'PASS' "no MCP servers declared in opencode.jsonc; the registry reports machine-global servers it has not adopted: $($undeclaredRegistrations -join ', ') (add an mcp block to adopt them)"
         } else {
