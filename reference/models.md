@@ -1,20 +1,31 @@
-# OpenCode Model Catalog — shipped skeleton
+# OpenCode Model Catalog
 
-> **Recheck due: YYYY-MM-DD — every 3 days.** Procedure: `reference/model-test.md`.
+> **Recheck due: `<date>` - every 3 days.** Procedure: `~/.config/opencode/reference/model-keeper.md`.
 > On recheck, move this date +3 days and re-verify the table below.
 
-This catalog ships with no adopted models: the harness is fully unwired by
-decision (see `.docs/unwired-routing.md`). When you wire an agent, add its
-`opencode-go/<id>` row here first — the harness doctor's Law 8 enforces that
-every live `model:` binding resolves against this table.
+> **TEMPLATE - adopter-owned skeleton.** This file ships EMPTY of measured data by
+> design: seat wiring lives in the adopter's `agents` map (or agent frontmatter) and is
+> NOT shipped with the harness. The installer PRESERVES an existing file. Rows are
+> recorded per `reference/model-keeper.md` - measured routes, prices, variants, and
+> history are adopter evidence, never shipped.
 
-| # | Model (opencode-go/<id>) | Price in / out / cache-read | Monthly cap | Smart evidence | Cheap evidence | Status |
-|---|--------------------------|-----------------------------|-------------|----------------|----------------|--------|
+This is an informational catalog of model IDs, provider availability, variants, and
+measured route windows. It routes nothing itself - seat routing lives in the adopter's
+`agents` map or agent frontmatter. The catalog's only machine-read contract is the table
+below (`scripts/harness-doctor.ps1` parses the `Model (provider/<id>)` header and the
+numbered backticked rows).
 
-## Notes
+Rates are USD per MTok, input / output / cache-read / cache-write. Context is
+input / max output. `<...>` slots are placeholders the adopter fills on first
 
-- Columns follow the harness ordering: context gate first, then price, cap, and
-  real measured evidence — never vendor claims.
-- The `model:` lines in `agents\*.md` must resolve against this table; the
-  harness doctor's Law 8 enforces it.
-- Rank rows by judgment, not a single formula; state the judgment calls.
+record; rows start empty - replace the example rows, never extend the table shape.
+
+| # | Model (provider/<id>) | Context | Rate (in/out/read/write) | Variants | Status |
+|---|----------------------|--------:|--------------------------|----------|--------|
+| 1 | `provider/example-model-1` | `<context>` | `<in>/<out>/<read>/<write>` | `<variants>` | `<status>` |
+| 2 | `provider/example-model-2` | `<context>` | `<in>/<out>/<read>/<write>` | `<variants>` | `<status>` |
+
+Example rows above are structural placeholders - replace with measured rows recorded
+per `reference/model-keeper.md`. No fallback ladder is shipped: provider errors are
+reported by OpenCode; the catalog never retries, substitutes, or changes the selected
+model.

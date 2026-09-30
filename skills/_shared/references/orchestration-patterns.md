@@ -7,8 +7,7 @@ grandchildren — and the multi-step pipeline stays user-driven: the user (or
 a slash command) drives define → plan → build → verify → review → ship and
 keeps the human checkpoints between steps. For a single request, the
 `master` agent leads and dispatches helpers but does not implement
-project code. The detailed playbook is
-`~/.config/opencode/skills/swarm-orchestration/SKILL.md`.
+project code.
 
 ## Runtime boundaries
 

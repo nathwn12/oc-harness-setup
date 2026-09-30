@@ -1,7 +1,7 @@
 ---
-description: Refresh the model catalog and bindings from live evidence
-agent: keeper
+description: Refresh the model catalog from live evidence
+agent: vault
 subagent: true
 ---
 
-Refresh the model picture: compare `reference/models.md` and the model bindings in the file-based `agents\*.md` definitions against the live catalogs, pricing, and variants, following the canonical protocol in `reference/model-keeper.md`. Apply only evidence-backed changes; keep the catalog, bindings, and config parsing consistent. Report changes, sources, and uncertainty — or a clean no-change result.
+Refresh `~/.config/opencode/reference/models.md` from live evidence using `~/.config/opencode/reference/model-keeper.md`. Do not change agent pins, routing, or bindings. Apply only sourced catalog corrections and report changes, sources, uncertainty, or a clean no-change result.

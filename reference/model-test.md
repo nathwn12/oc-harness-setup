@@ -1,6 +1,11 @@
 # Model Test — fixed contender intake (Go only)
 
-How a new OpenCode Go model earns a row in `reference/models.md`. Same bytes in, same
+> **TEMPLATE — unfilled contender bench (Go only).** This is the Go-only bench a new model
+> runs to earn a row in `~/.config/opencode/reference/models.md`; the canonical 3-day recheck procedure is
+> `~/.config/opencode/reference/model-keeper.md`. The `<DATE>` / `<YOUR_MODEL>` slots below are intentional
+> template placeholders — fill them per bench series before citing a run as evidence.
+
+How a new OpenCode Go model earns a row in `~/.config/opencode/reference/models.md`. Same bytes in, same
 harness around it, every time — so scores are comparable across models and across months.
 
 ## 0. Sweep (every recheck, every 3 days)
@@ -8,7 +13,7 @@ harness around it, every time — so scores are comparable across models and acr
 List the live catalog and diff against the ranked table — **all Go IDs are contenders**:
 
 ```powershell
-opencode models 2>$null | Select-String 'opencode-go/'
+opencode models 2>$null | Select-String '<provider>/'
 ```
 
 **Fresh-online rule (standing):** re-pull the model list, prices, caps, and context
@@ -66,7 +71,7 @@ labeled, never re-scored):
   2. Always pair the top rung against one level down on the fixed task.
   3. Keep the highest rung only if it wins clearly (better quality at acceptable cost —
      the Muse xhigh precedent: +3 qual, +73% TPS, −27% wall for +18%). Otherwise drop
-     one and live there (the DeepSeek max precedent: 7,337 reasoning tokens, −5 quality,
+     one and live there (the verbosity precedent: 7,337 reasoning tokens, -5 quality,
      3× wall, +68% cost — verbosity that loses value to performance).
   4. No two models expose the same rungs — probe, never assume (`<YOUR_MODEL>` exposes none).
 - `steps: 8` ceiling, shell / web / subagents denied, 600 s hard timeout, single run
@@ -138,10 +143,10 @@ No standing persona panel exists; the objective /60 stays deterministic (DOM-mea
 lead-scored). When the top two are within 3 points, the subjective design /40 goes to a
 three-judge panel of existing specialists, each scoring blind from the artifact:
 
-- `security-auditor` — escape/XSS discipline, inline-script hygiene, autocomplete +
+- `reviewer` (security lens) — escape/XSS discipline, inline-script hygiene, autocomplete +
   persistence privacy.
-- `reviewer` — correctness of states, a11y outcomes, focus management, no-dead-link rule.
-- `web-performance-auditor` — size budget, render cost, animation discipline,
+- `reviewer` (correctness lens) — correctness of states, a11y outcomes, focus management, no-dead-link rule.
+- `reviewer` (perf lens) — size budget, render cost, animation discipline,
   reduced-motion honesty.
 
 Majority moves the design score; dissent recorded in one line. Judges never touch the

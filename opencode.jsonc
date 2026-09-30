@@ -6,7 +6,8 @@
   // This is the oc-harness-setup base config; the installer preserves your
   // model/providers/mcp/plugins.
   "$schema": "https://opencode.ai/config.json",
-  "default_agent": "master",
+  "default_agent": "orchestrator",
+  "formatter": true,
   "compaction": {
     "auto": true,
     "keep": {
@@ -63,7 +64,11 @@
   "references": {
     "orchestration": {
       "path": "~/.config/opencode/reference",
-      "description": "Harness references — smoke checks, model keeper, db hygiene."
+      "description": "Harness references - smoke checks, model keeper, db hygiene."
+    },
+    "quality": {
+      "path": "~/.config/opencode/skills/_shared/references",
+      "description": "Supporting security, testing, accessibility, performance, and observability checklists used by matching skills."
     }
   },
   "permissions": [
@@ -335,7 +340,7 @@
     },
     {
       "action": "skill",
-      "resource": "code-review-and-quality",
+      "resource": "browser-testing-with-devtools",
       "effect": "allow"
     },
     {
@@ -355,7 +360,17 @@
     },
     {
       "action": "skill",
+      "resource": "flight-deck",
+      "effect": "allow"
+    },
+    {
+      "action": "skill",
       "resource": "frontend-ui-engineering",
+      "effect": "allow"
+    },
+    {
+      "action": "skill",
+      "resource": "gauntlet",
       "effect": "allow"
     },
     {
@@ -370,17 +385,17 @@
     },
     {
       "action": "skill",
-      "resource": "incremental-implementation",
-      "effect": "allow"
-    },
-    {
-      "action": "skill",
       "resource": "observability-and-instrumentation",
       "effect": "allow"
     },
     {
       "action": "skill",
       "resource": "performance-optimization",
+      "effect": "allow"
+    },
+    {
+      "action": "skill",
+      "resource": "pilot-report",
       "effect": "allow"
     },
     {
@@ -405,12 +420,12 @@
     },
     {
       "action": "skill",
-      "resource": "swarm-orchestration",
+      "resource": "test-driven-development",
       "effect": "allow"
     },
     {
       "action": "skill",
-      "resource": "test-driven-development",
+      "resource": "test-flight",
       "effect": "allow"
     },
     {

@@ -7,11 +7,11 @@ The skill-specific branch of [`writing-for-agents`](SKILL.md): what changes when
 Two choices, trading the two loads:
 
 - A **model-invoked** skill keeps a `description`, so the agent can fire it autonomously, and other skills can reach it. You can still type its name: model-invocation always _includes_ user reach; a description only ever adds agent discovery, never removes the human's. The description is the skill's top-level context pointer, forced to stay loaded at all times: permanent context load in exchange for discoverability. A model-invoked skill whose content is all reference is also one home for shared reference: another skill can invoke it, so reference needed by several skills lives in one place. Mechanics: omit the `opencode/autoinvoke: false` marker, and write a model-facing description carrying the trigger branches (the pointer-writing rules in `SKILL.md` apply in full).
-- An **explicit-only** skill hides it from autonomous reach: only deliberate invocation fires it, and no other skill can. Zero context load, but it spends cognitive load: you are the index that must remember it exists. Mechanics: set `metadata: {"opencode/autoinvoke": false}`; the `description` becomes human-facing: a one-line summary, trigger lists stripped. A **user-invoked command** (`commands/*.md`) is the other explicit form: typing `/name` is the only way in.
+- An **explicit-only** skill is hidden from the model's advertised skill list, but remains registered and loadable by exact ID from a command or deliberate instruction. It removes the always-advertised description cost while preserving explicit reach. Set `metadata: {"opencode/autoinvoke": false}` and keep the description as a short human-facing summary.
 
 Pick model-invocation only when the agent must reach the skill on its own, or another skill must. If it only ever fires by hand, make it explicit-only and pay no context load.
 
-Shared reference that two explicit skills both need can live in neither: with no descriptions, neither can fire the other. Push it to a plain file outside the skill system: external reference any skill can point at.
+Shared reference that two skills need can live in a plain reference file and be loaded only from the matching branch.
 
 ## Splitting by invocation
 
@@ -19,4 +19,4 @@ The invocation cut of splitting (the sequence cut lives in `SKILL.md`): split of
 
 ## Router skills
 
-When explicit skills multiply past what you can remember, that piled-up cognitive load is cured by a **router**: one entry point that names the others and when to reach for each, so the human has one thing to remember instead of many. In this harness `AGENTS.md`'s intent-to-workflow table is the always-loaded router; keep it current as the front door. A router can only hint, never fire another explicit skill: only the human can reach those.
+When explicit skills multiply, route them through commands or the compact lookup at `~/.config/opencode/reference/intent-routing.md`. Exact-ID loading remains available even when a skill is not advertised.
