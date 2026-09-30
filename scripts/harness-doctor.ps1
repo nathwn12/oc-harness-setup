@@ -318,10 +318,12 @@ function Get-ModelCatalog {
     $provider = ''
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return [pscustomobject]@{ Ids = $ids; Provider = $provider; Found = $false } }
     $text = Get-SafeText -Path $Path
-    foreach ($m in [regex]::Matches($text, '(?m)^\|\s*\d+\s*\|\s*`([^`]+)`')) { $ids.Add($m.Groups[1].Value.Trim()) }
-    foreach ($m in [regex]::Matches($text, 'opencode-go/([A-Za-z0-9._-]+)')) { $ids.Add($m.Groups[1].Value.Trim()) }
     $providerMatch = [regex]::Match($text, 'Model \((?<provider>[A-Za-z0-9._-]+)/<id>\)')
-    if ($providerMatch.Success) { $provider = $providerMatch.Groups['provider'].Value }
+    $provider = if ($providerMatch.Success) { $providerMatch.Groups['provider'].Value } else { '' }
+    foreach ($m in [regex]::Matches($text, '(?m)^\|\s*\d+\s*\|\s*`([^`]+)`')) { $ids.Add($m.Groups[1].Value.Trim()) }
+    if ($providerMatch.Success) {
+        foreach ($m in [regex]::Matches($text, [regex]::Escape($provider) + '/([A-Za-z0-9._-]+)')) { $ids.Add($m.Groups[1].Value.Trim()) }
+    }
     $ids = [System.Collections.Generic.List[string]]::new([string[]](@($ids | Sort-Object -Unique)))
     return [pscustomobject]@{ Ids = $ids; Provider = $provider; Found = $true }
 }
