@@ -1,5 +1,7 @@
 ---
 description: Write a handoff for a fresh session
+agent: orchestrator
+subagent: false
 ---
 
-Write `handoff.md` in this session's state directory for a fresh session to continue from: goal, current state, exact next steps, files to read first, open decisions. `$ARGUMENTS` is optional scope.
+Write `session.yaml.handoff` in this session's state directory: goal, current state, exact next steps, files to read first, and open decisions. `$ARGUMENTS` optionally narrows the handoff. Never create Markdown state files.

@@ -1,6 +1,6 @@
 ---
 name: creative-writing
-description: "Three modes for turning raw material into finished prose - `writing-fragments` mines raw fragments, `writing-beats` assembles them into a journey of beats, and `writing-shape` shapes them into an article paragraph by paragraph. Use when drafting, mining, or structuring an article, essay, or piece of writing. Explicit-only: invoke deliberately for a writing session."
+description: "Turns raw material into finished prose via `writing-fragments`, `writing-beats`, and `writing-shape` modes. Use when drafting, mining, or structuring an article, essay, or piece of writing. Explicit-only: invoke deliberately for a writing session."
 metadata:
   "opencode/autoinvoke": false
 ---

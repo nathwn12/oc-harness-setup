@@ -4,4 +4,4 @@ agent: reviewer
 subagent: true
 ---
 
-Give `$ARGUMENTS` an independent look: inspect the work and its behavior, run the checks that matter, and report findings in severity order with file:line evidence, ending with one verdict (`pass`, `revise`, or `blocked`) and the smallest next action. Follow the local `code-review-and-quality` skill when reviewing changes. Do not edit files or spawn helpers.
+Review `$ARGUMENTS` independently. Inspect behavior, run relevant checks, report findings in severity order with `file:line` evidence, and end with one verdict (`pass`, `revise`, or `blocked`) plus the smallest next action. Do not edit or delegate.

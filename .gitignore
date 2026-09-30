@@ -6,3 +6,16 @@ dist/
 **/*.bak*
 state/
 archive/
+
+# credentials & secrets (installed guard)
+service.json
+cli.json
+**/*.pem
+**/*.key
+**/*.pfx
+**/id_rsa*
+**/.netrc
+**/.npmrc
+**/credentials*
+**/opencode.db
+**/opencode.db-*

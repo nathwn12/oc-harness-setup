@@ -39,11 +39,11 @@ const COPY_FILES = ['AGENTS.md', '.gitignore'];
 //                   allowlist is deny-then-allows; see mergeJsonc).
 //   everything else (known or unknown) — the adopter's value wins; the distro
 //                   value stays when the adopter does not define the key.
-const INSTALL_OWNED = ['$schema', 'default_agent', 'compaction', 'tool_output', 'media', 'watcher'];
+const INSTALL_OWNED = ['$schema', 'default_agent', 'formatter', 'compaction', 'tool_output', 'media', 'watcher'];
 const UNION_KEYS = ['plugins'];
 // Adopter-owned files: shipped copies are skeletons, so an existing destination
 // that differs MUST survive an upgrade — overwriting it destroys their data.
-const PRESERVE_IF_EXISTS = new Set(['reference/models.md', 'AGENTS.md', '.gitignore']);
+const PRESERVE_IF_EXISTS = new Set(['reference/models.md', 'reference/owner-pin.md', 'AGENTS.md', '.gitignore']);
 // Author-leak markers — they catch the MAINTAINER's machine leaking into the
 // shipped tree (paths, username, session ids). They are linted against the
 // package source only, never the adopter's config, so a legitimate
@@ -510,6 +510,31 @@ function registerPlugins() {
   return list;
 }
 
+// The doctor's Law 6 grades `opencode plugin list`, but right after `plugin
+// add` on a fresh config the registry can lag the file write by minutes - the
+// doctor would grade an empty list and fail. Poll the list (bounded: up to 10
+// attempts, 6 s apart) until every requested name appears in a row, mirroring
+// the doctor's own row-contains-name check. Warning-only on expiry - exit
+// codes are unchanged (the doctor grades; a re-run is idempotent).
+async function waitForPluginRegistration(plugins, configDir) {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  for (let attempt = 1; attempt <= 10; attempt++) {
+    const res = exec('opencode', ['plugin', 'list'], true);
+    const rows = (res.stdout || '').split(/\r?\n/).filter((l) => l.trim() !== '');
+    const missing = plugins.filter((name) => !rows.some((row) => row.includes(name)));
+    const state = res.error || res.status !== 0
+      ? `list failed (${res.error ? 'not found' : `exit ${res.status}`})`
+      : `${rows.length} row(s), missing: ${missing.length ? missing.join(', ') : 'none'}`;
+    log('plugin', `registration wait ${attempt}/10 (${configDir}) - ${state}`);
+    if (!missing.length) {
+      for (const name of plugins) log('plugin', `${name} appears in the registry`);
+      return;
+    }
+    if (attempt < 10) await sleep(6000);
+  }
+  console.warn(`[plugin] WARNING: plugin registry did not confirm ${plugins.join(', ')} within 60s - the doctor will grade it; re-run setup (idempotent) if it fails`);
+}
+
 /* --------------------------------- doctor ---------------------------------- */
 
 function pwshProbe() {
@@ -560,7 +585,7 @@ function printManifest(configDir, files, backupPath, doctor) {
   console.log(`  incoming files         : ${files.length} (${newCount} new, ${sameCount} already identical — rerun-safe)`);
   console.log(`  backup path            : ${backupPath}`);
   console.log('  opencode.jsonc merge   : distro base (permissions/deny block, skill allowlist,');
-  console.log('                            default_agent: "master", references registry)');
+  console.log('                            default_agent: "orchestrator", references registry)');
   console.log('                            + your keys kept · permissions: harness allows, yours, harness denies last');
   console.log('  plugin registration    : oc-flight-deck (via \'opencode plugin add\')');
   console.log(`  doctor plan            : ${doctor}`);
@@ -793,6 +818,10 @@ async function setup(opts) {
   // list` — the doctor's Law 6 grades exactly that list.
   registerPlugins();
   mergeJsonc(configDir, backup, manifest);
+
+  // Right after a fresh `plugin add` the registry can lag by minutes; wait
+  // (bounded) for it to settle so the doctor's Law 6 grades a settled list.
+  await waitForPluginRegistration(manifest.plugins, configDir);
 
   // R6: record the skip in the journal so "all 16 laws unrun" is never silent.
   manifest.doctorSkipped = !doctorProbe.usable || !existsSync(path.join(configDir, 'scripts', 'harness-doctor.ps1'));

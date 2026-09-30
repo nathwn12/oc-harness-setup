@@ -1,6 +1,8 @@
 ---
 name: writing-for-agents
-description: Reference for writing documents an agent consumes — skills, commands, agents, AGENTS.md, and harness references. Use when creating or editing any agent-facing doc, sharpening a skill description or pointer, or pruning bloated instructions.
+description: 'Reference for writing agent-facing documents — skills, commands, agents, AGENTS.md, harness references. Use when creating or editing any agent-facing doc, sharpening a skill description or pointer, or pruning bloated instructions'
+metadata:
+  "opencode/autoinvoke": false
 ---
 
 # Writing for Agents
@@ -52,6 +54,10 @@ Every step ends on a **completion criterion**, the condition that tells the agen
 - **Demand**: how much it requires. "Every modified model accounted for" forces thorough work where "produce a change list" does not. Demand drives **legwork** (the digging the agent does within the work, latent in the wording rather than written as its own step), and it is not step-bound: "every rule applied" binds a body of flat reference just as "every step done" binds a sequence, which is how an all-reference document still carries an exhaustiveness bar.
 
 The strongest criteria are both checkable and exhaustive.
+
+## Earns its place
+
+A skill is justified only for a non-obvious, cross-project, broadly-applicable technique. Project-specific conventions belong in the instructions file (usually `AGENTS.md`); standard practice needs nothing; mechanical constraints should be **automated, not documented** — a linter, schema, or test enforces them better than prose. If a proposed skill fails this gate, delete it or fold it into an existing one.
 
 ## When to split
 
