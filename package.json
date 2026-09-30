@@ -24,7 +24,8 @@
   },
   "scripts": {
     "check": "npm pack --dry-run",
-    "test": "node --check bin/cli.js"
+    "test": "node --check bin/cli.js",
+    "prepublishOnly": "npm run check"
   },
   "publishConfig": {
     "access": "public"
