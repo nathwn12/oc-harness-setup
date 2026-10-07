@@ -1,17 +1,24 @@
 <div align="center">
 
-# :rocket: oc-harness-setup
+# 🚀 oc-harness-setup
 
 **The whole harness in one command.**
 *Orchestrator primary . 7 agents . 14 commands . 20 skills . a doctor that proves it.*
 
-![npm](https://img.shields.io/npm/v/oc-harness-setup) ![license](https://img.shields.io/badge/license-MIT-blue) ![opencode](https://img.shields.io/badge/opencode-v2-blueviolet) ![node](https://img.shields.io/badge/node-%E2%89%A522-green) ![downloads](https://img.shields.io/npm/dm/oc-harness-setup)
+[![npm version](https://img.shields.io/npm/v/oc-harness-setup)](https://www.npmjs.com/package/oc-harness-setup) [![license: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE) [![node >= 22](https://img.shields.io/badge/node-%E2%89%A522-green)](https://nodejs.org) [![opencode v2](https://img.shields.io/badge/opencode-v2-blueviolet)](https://opencode.ai) [![npm weekly downloads](https://img.shields.io/npm/dw/oc-harness-setup)](https://www.npmjs.com/package/oc-harness-setup) [![ci](https://github.com/nathwn12/oc-harness-setup/actions/workflows/ci.yml/badge.svg)](https://github.com/nathwn12/oc-harness-setup/actions/workflows/ci.yml)
 
 </div>
 
 ---
 
-## :zap: Quick start
+## ⚡ Quick start
+
+```text
+Install oc-harness-setup:
+1. Run: npx --yes oc-harness-setup setup
+2. Restart OpenCode.
+3. Verify: pwsh -File ~/.config/opencode/scripts/harness-doctor.ps1
+```
 
 ```bash
 npx --yes oc-harness-setup setup
@@ -21,24 +28,19 @@ npx --yes oc-harness-setup setup
 
 ---
 
-## :wrench: What setup does
+## 🔧 What setup does
 
 ```text
 preflight -> locate config -> consent gate -> backup -> install -> verify
 ```
 
 - **Consent first** - the full manifest prints before anything moves; `--dry-run` shows it without touching a file
-- **Your config survives** - the installer owns runtime policy (`$schema`, `default_agent`, `formatter`, `compaction`, `tool_output`, `media`, `watcher`), unions your `plugins` and `references` with the harness's, and preserves every other top-level key, known or unknown - `provider`, `model`, `agents`, `commands`, `skills`, `mcp`, or a key of your own
-- **Your `permissions` still apply** - your rules are placed after the harness's allow/ask rules and ahead of its hard denies, so a rule of yours beats a harness allow while the hard denies stay last
-- **Reversible** - a SHA-256 journal records every touched file; `--uninstall` removes the files the installer created and restores any file it overwrote from the pre-install backup (its path is printed before anything moves). Post-install edits to a restored file are copied aside first as `<name>.replaced-<ts>` - never destroyed
 - **Idempotent** - re-run anytime; identical files are skipped
 - **Verified** - ends on the harness's own 16-law doctor; red = nonzero exit, with every failing law naming the check, the detail, and a proposed fix. The doctor needs PowerShell 7: if it is missing, the laws are **skipped** and reported as skipped - not passed
 
 > *Installation never modifies your config by itself - setup is always an explicit command you run. **No postinstall, ever.***
 
----
-
-## :package: What you get
+### 📦 What you get
 
 | Component | What it gives you |
 |:---|:---|
@@ -50,7 +52,14 @@ preflight -> locate config -> consent gate -> backup -> install -> verify
 
 ---
 
-## 🛡️ Safety by design
+## ⚙️ Configure
+
+- **Your config survives** - the installer owns runtime policy (`$schema`, `default_agent`, `formatter`, `compaction`, `tool_output`, `media`, `watcher`), unions your `plugins` and `references` with the harness's, and preserves every other top-level key, known or unknown - `provider`, `model`, `agents`, `commands`, `skills`, `mcp`, or a key of your own
+- **Your `permissions` still apply** - your rules are placed after the harness's allow/ask rules and ahead of its hard denies, so a rule of yours beats a harness allow while the hard denies stay last
+
+---
+
+## 🛡️ Safety
 
 > Strict deny-set permissions that survive `--auto` . skills fail closed on unknown IDs . credentials stay by pointer . backup before any change.
 
@@ -60,10 +69,28 @@ This package ships a **fail-closed permission set**: the disk-destroy and creden
 
 ---
 
-<div align="center">
+## 🗑️ Uninstall
+
+```bash
+npx --yes oc-harness-setup setup --uninstall
+```
+
+- **Reversible** - a SHA-256 journal records every touched file; `--uninstall` removes the files the installer created and restores any file it overwrote from the pre-install backup (its path is printed before anything moves). Post-install edits to a restored file are copied aside first as `<name>.replaced-<ts>` - never destroyed
+
+---
+
+## 🧰 Development
+
+Node >= 22, no build step (pure Node ESM, stdlib only, zero runtime dependencies). `npm test` syntax-checks `bin/cli.js`; `npm run check` (`npm pack --dry-run`) runs on `prepublishOnly` before any publish.
+
+---
+
+## 🧩 Compatibility
 
 OpenCode V2 . Node >= 22 . Windows / macOS / Linux (config path auto-resolved)
 
-**MIT © 2026 nathwn12** . For OpenCode. Free.
+---
 
-</div>
+## 📄 License
+
+MIT © 2026 nathwn12 . For OpenCode. Free. See [LICENSE](./LICENSE).
