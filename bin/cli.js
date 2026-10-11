@@ -49,14 +49,14 @@ const PRESERVE_IF_EXISTS = new Set(['reference/models.md', 'reference/owner-pin.
 // package source only, never the adopter's config, so a legitimate
 // `{file:~/.secrets/…}` apiKey pointer can never abort an install.
 //
-// Every marker is anchored to the AUTHOR's CONCRETE machine — drive `Q:`, user
-// `nathan`, a real `ses_<id>` — never to the product's own vocabulary. The
+// Every marker is anchored to the author's concrete machine — a drive
+// letter, a username, a real session id — never to the product's own vocabulary. The
 // harness's safety tooling legitimately ships the generic forms
 // (`C:\Users\<name>`, `ses_<id>`, `~/.secrets/…` — redactor regexes and their
 // self-test probes), so a bare generic token would abort every correct install.
 // A leak of an author path into a secret store is caught by the username/drive
 // markers; a bare `.secrets` cannot distinguish product from author and so is
-// deliberately not a marker. `nathan` also subsumes `<user-profile>`.
+// deliberately not a marker. The username marker also subsumes the full profile path.
 const LINT_PATTERNS = [
   { label: 'q:\\', test: /q:\\/ },
   { label: 'nathan', test: /nathan/ },
