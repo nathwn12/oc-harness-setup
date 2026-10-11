@@ -1,13 +1,12 @@
+# nathwn12 house CI — stack: node (pack ships via npm; steps are the repo's real build/test commands)
 name: ci
-
 on:
   push:
     branches: [main]
   pull_request:
-
+  workflow_dispatch:
 permissions:
   contents: read
-
 jobs:
   test:
     runs-on: ubuntu-latest
