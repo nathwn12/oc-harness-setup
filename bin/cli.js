@@ -79,6 +79,28 @@ function nextFreePath(base) {
   }
 }
 
+// F4: atomic file replace — rename dest aside, rename tmp into place, then
+// delete the aside copy (restoring the aside copy if the middle step throws).
+// Closes the rm-then-rename window where a crash left the user's file DELETED
+// with the new copy orphaned as tmp.
+function atomicInstall(tmp, dest) {
+  if (!existsSync(dest)) {
+    renameSync(tmp, dest);
+    return;
+  }
+  const aside = nextFreePath(`${dest}.oc-harness-setup-aside-${process.pid}`);
+  renameSync(dest, aside);
+  try {
+    renameSync(tmp, dest);
+  } catch (err) {
+    try {
+      renameSync(aside, dest);
+    } catch {}
+    throw err;
+  }
+  rmSync(aside, { force: true });
+}
+
 function usage() {
   console.log(`oc-harness-setup — install the OpenCode harness into your config dir.
 
@@ -165,6 +187,10 @@ function findConfigDir() {
         dir = path.join(homedir(), dir.slice(2));
       }
       if (dir) {
+        // F7: opencode echoes OPENCODE_CONFIG_DIR verbatim, so a relative
+        // value arrives here still relative — resolve to absolute so the
+        // manifest records a cwd-independent destination.
+        dir = path.resolve(dir);
         log('config', `resolved via 'opencode debug paths': ${dir}`);
         return dir;
       }
@@ -174,8 +200,16 @@ function findConfigDir() {
   }
   const env = process.env;
   if (env.OPENCODE_CONFIG_DIR) {
-    log('config', `env OPENCODE_CONFIG_DIR: ${env.OPENCODE_CONFIG_DIR}`);
-    return env.OPENCODE_CONFIG_DIR;
+    // F7: resolve verbatim env (relative → cwd-dependent) to absolute and
+    // expand a leading ~, mirroring the debug-paths branch.
+    let dir = String(env.OPENCODE_CONFIG_DIR).trim().replace(/^["']|["']$/g, '');
+    if (dir === '~' || (dir.startsWith('~') && (dir[1] === '/' || dir[1] === '\\'))) {
+      dir = path.join(homedir(), dir.length > 1 ? dir.slice(2) : '');
+    } else {
+      dir = path.resolve(dir);
+    }
+    log('config', `env OPENCODE_CONFIG_DIR: ${dir}`);
+    return dir;
   }
   if (env.XDG_CONFIG_HOME) {
     const p = path.join(env.XDG_CONFIG_HOME, 'opencode');
@@ -293,8 +327,7 @@ function stageFiles(files, manifest) {
       mkdirSync(path.dirname(f.dest), { recursive: true });
       const tmp = `${f.dest}.oc-harness-setup-tmp-${process.pid}`;
       writeFileSync(tmp, readFileSync(f.src));
-      rmSync(f.dest, { force: true }); // Windows rename() cannot overwrite
-      renameSync(tmp, f.dest);
+      atomicInstall(tmp, f.dest);
       written += 1;
     }
     // Preserved entries journal the SRC hash on purpose: --uninstall deletes
@@ -461,8 +494,7 @@ function mergeJsonc(configDir, backupPath, manifest) {
   mkdirSync(configDir, { recursive: true });
   const tmp = `${targetPath}.oc-harness-setup-tmp-${process.pid}`;
   writeFileSync(tmp, out);
-  rmSync(targetPath, { force: true });
-  renameSync(tmp, targetPath);
+  atomicInstall(tmp, targetPath);
   manifest.files.push({ path: 'opencode.jsonc', hash: sha256Text(out), action: 'merged' });
   log(
     'merge',
@@ -607,7 +639,10 @@ async function confirmProceed() {
 
 /* -------------------------------- uninstall -------------------------------- */
 
-function uninstall(configDir) {
+function uninstall(configDir, opts = {}) {
+  // F3: --dry-run / --ci preview what would be removed and return 0 without
+  // deleting (setup --uninstall --dry-run must touch nothing).
+  const preview = !!(opts.preview || opts.dryRun || opts.ci);
   const manifestPath = path.join(configDir, MANIFEST_FILE);
   if (!existsSync(manifestPath)) {
     bail(
@@ -652,31 +687,63 @@ function uninstall(configDir) {
         // the restore overwrites it. Byte-identical installer output needs no
         // copy.
         if (!entry.hash || sha256File(resolved) !== entry.hash) {
-          const keep = nextFreePath(`${resolved}.replaced-${tsStamp()}`);
-          cpSync(resolved, keep);
-          preserved += 1;
-          log('uninstall', `kept   ${path.relative(base, keep)} (your post-install edits — copied before restore)`);
+          if (preview) {
+            preserved += 1;
+            log('uninstall', `would keep ${path.relative(base, nextFreePath(`${resolved}.replaced-${tsStamp()}`))} (your post-install edits — would copy before restore)`);
+          } else {
+            const keep = nextFreePath(`${resolved}.replaced-${tsStamp()}`);
+            cpSync(resolved, keep);
+            preserved += 1;
+            log('uninstall', `kept   ${path.relative(base, keep)} (your post-install edits — copied before restore)`);
+          }
         }
-        cpSync(original, resolved, { force: true });
-        restored += 1;
-        log('uninstall', `restored ${rel} (your pre-install file, from ${manifest.backupPath})`);
+        if (preview) {
+          restored += 1;
+          log('uninstall', `would restore ${rel} (your pre-install file, from ${manifest.backupPath})`);
+        } else {
+          cpSync(original, resolved, { force: true });
+          restored += 1;
+          log('uninstall', `restored ${rel} (your pre-install file, from ${manifest.backupPath})`);
+        }
+      } else if (entry.action === 'merged' && entry.hash && sha256File(resolved) === entry.hash) {
+        // F5: installer-created merge output (adopter had only opencode.json,
+        // so no backup holds opencode.jsonc) still hashes to what was written
+        // — it is pure installer output, so delete it; keep only user-modified.
+        if (preview) {
+          removed += 1;
+          log('uninstall', `would remove ${rel} (installer-created merge output — no pre-install file to restore)`);
+        } else {
+          rmSync(resolved, { force: true });
+          removed += 1;
+          log('uninstall', `removed ${rel} (installer-created merge output — no pre-install file to restore)`);
+        }
       } else {
         kept += 1;
-        log('uninstall', `kept   ${rel} (WARNING: no backup at ${original || '(no backupPath recorded)'} — not deleted)`);
+        log('uninstall', `${preview ? 'would keep' : 'kept  '} ${rel} (WARNING: no backup at ${original || '(no backupPath recorded)'} — not deleted)`);
       }
       continue;
     }
     if (entry.hash && sha256File(resolved) === entry.hash) {
-      rmSync(resolved, { force: true });
-      removed += 1;
-      log('uninstall', `removed ${rel}`);
+      if (preview) {
+        removed += 1;
+        log('uninstall', `would remove ${rel}`);
+      } else {
+        rmSync(resolved, { force: true });
+        removed += 1;
+        log('uninstall', `removed ${rel}`);
+      }
     } else {
       kept += 1;
       log('uninstall', `kept   ${rel} (you modified it — hash differs)`);
     }
   }
-  rmSync(manifestPath, { force: true });
-  log('uninstall', `removed ${removed}, restored ${restored} overwritten, kept ${kept} modified, preserved ${preserved} edit-copies, already-missing ${missing}`);
+  if (preview) {
+    log('uninstall', `would remove ${removed}, would restore ${restored} overwritten, would keep ${kept} modified, preserved ${preserved} edit-copies, already-missing ${missing}`);
+    console.log('[dry-run] preview only — nothing was touched.');
+  } else {
+    rmSync(manifestPath, { force: true });
+    log('uninstall', `removed ${removed}, restored ${restored} overwritten, kept ${kept} modified, preserved ${preserved} edit-copies, already-missing ${missing}`);
+  }
   console.log(`  backup (pre-install config dir): ${manifest.backupPath || '(none recorded)'}`);
   if (manifest.priorBackup) console.log(`  later snapshot (kept for the chain): ${manifest.priorBackup}`);
   console.log('  to restore it fully, replace the current config dir with that backup.');
@@ -758,7 +825,81 @@ function warnConfigTargets(configDir) {
   }
 }
 
+// F6: sweep installer crash litter (*.oc-harness-setup-tmp-*) left if killed
+// between writeFileSync and renameSync. The infix `.oc-harness-setup-tmp-`
+// never appears in real user files (opencode.jsonc, agents/*.md, …), so the
+// sweep is unambiguous installer junk. Runs only on the mutating path (never
+// under --dry-run / --ci, which promise to touch nothing).
+function sweepTmpLitter(configDir) {
+  if (!existsSync(configDir)) return 0;
+  try {
+    if (!statSync(configDir).isDirectory()) return 0;
+  } catch {
+    return 0;
+  }
+  let swept = 0;
+  const walk = (dir) => {
+    let ents;
+    try {
+      ents = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const ent of ents) {
+      const p = path.join(dir, ent.name);
+      if (ent.isDirectory()) walk(p);
+      else if (ent.name.includes('.oc-harness-setup-tmp-')) {
+        try {
+          rmSync(p, { force: true });
+          swept += 1;
+          log('sweep', `removed crash litter ${path.relative(configDir, p)}`);
+        } catch {}
+      }
+    }
+  };
+  walk(configDir);
+  return swept;
+}
+
+// F1: validate every JSONC parse BEFORE any write, so a broken config bails
+// before staging overwrites live files (no manifest => uninstall could not restore).
+function validateJsoncInputs(configDir, backupPath) {
+  const distroPath = path.join(PKG_ROOT, 'opencode.jsonc');
+  if (existsSync(distroPath)) {
+    parseJsonc(
+      readFileSync(distroPath, 'utf8'),
+      'the shipped opencode.jsonc (this package build looks broken)'
+    );
+  }
+  const targetPath = path.join(configDir, 'opencode.jsonc');
+  const jsonPath = path.join(configDir, 'opencode.json');
+  const sourcePath = existsSync(targetPath) ? targetPath : existsSync(jsonPath) ? jsonPath : null;
+  if (sourcePath) {
+    parseJsonc(
+      readFileSync(sourcePath, 'utf8'),
+      `your existing ${path.basename(sourcePath)} — aborting before any write; your config is untouched (backup: ${backupPath})`
+    );
+  }
+}
+
 async function setup(opts) {
+  // F2: --ci / --dry-run promise print-only exit 0 with no mutation — honour
+  // them BEFORE preflight(), which bails without the opencode binary (exactly
+  // the headless case --ci exists for). Read-only manifest path only.
+  if (opts.ci || opts.dryRun) {
+    const configDir = findConfigDir();
+    const files = collectIncoming(configDir);
+    const prior = readManifest(configDir); // read-only
+    const newBackupPath = nextBackupPath(configDir);
+    const backupPath = prior && prior.backupPath ? prior.backupPath : newBackupPath;
+    printManifest(configDir, files, backupPath, doctorPlan());
+    if (opts.dryRun) {
+      console.log('[dry-run] manifest only — nothing was touched.');
+      return 0;
+    }
+    console.log('[ci] refusing to mutate — print-only. Run setup interactively to install.');
+    return 0;
+  }
   preflight();
   const configDir = findConfigDir();
   warnConfigTargets(configDir);
@@ -784,20 +925,18 @@ async function setup(opts) {
   const doctorProbe = pwshProbe(); // read-only probe
   printManifest(configDir, files, backupPath, doctorPlan());
 
-  if (opts.dryRun) {
-    console.log('[dry-run] manifest only — nothing was touched.');
-    return 0;
-  }
-  if (opts.ci) {
-    console.log('[ci] refusing to mutate — print-only. Run setup interactively to install.');
-    return 0;
-  }
+  // (F2: --dry-run / --ci already returned print-only before preflight.)
   if (!(await confirmProceed())) {
     console.log('[gate] aborted — nothing was modified.');
     return 0;
   }
 
   /* ---------------- mutations begin (all journaled) ---------------- */
+  // F1: every parse validated BEFORE the first write — a broken config bails
+  // here, before staging overwrites live files.
+  validateJsoncInputs(configDir, backupPath);
+  // F6: sweep unambiguous installer crash litter before the first write.
+  sweepTmpLitter(configDir);
   const backup = makeBackup(configDir, newBackupPath);
   const manifest = {
     package: PKG_NAME,
@@ -882,6 +1021,11 @@ async function main() {
   if (!opts) return;
   if (opts.uninstall) {
     const configDir = findConfigDir();
+    // F3: honour --dry-run / --ci in the uninstall branch — preview only.
+    if (opts.dryRun || opts.ci) {
+      uninstall(configDir, { preview: true });
+      return;
+    }
     uninstall(configDir);
     return;
   }
