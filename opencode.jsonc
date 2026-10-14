@@ -7,7 +7,9 @@
   // model/providers/mcp/plugins.
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "orchestrator",
-  "formatter": true,
+  // Formatting OFF (measured 2026-10-14): an object value ENABLES every built-in
+  // (off by default); a formatter silently rewrites bytes after write/edit/patch, so `cargo fmt` / `ruff format` stay manual.
+  "formatter": false,
   "compaction": {
     "auto": true,
     "keep": {
