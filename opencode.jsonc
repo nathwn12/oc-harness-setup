@@ -7,7 +7,7 @@
   // model/providers/mcp/plugins.
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "orchestrator",
-  "formatter": true,
+  "formatter": false,
   "compaction": {
     "auto": true,
     "keep": {
