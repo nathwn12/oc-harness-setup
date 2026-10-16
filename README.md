@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.svg" width="128" height="128" alt="oc-harness-setup icon" />
+  <img src="assets/icon.svg" width="120" height="120" alt="oc-harness-setup icon" />
 </p>
 <h1 align="center">oc-harness-setup</h1>
 <p align="center"><strong>Install and orchestrate the whole OpenCode harness in one command - PowerShell.</strong></p>
