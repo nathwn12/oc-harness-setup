@@ -5,11 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.3] - 2026-10-16
 
-### Added
+### Changed
 
-- Nothing yet.
+- House brand shape pass: README header icon 120, CI template byte-exact
+  to the kit.
+- Base config ships with formatting off (object formatter value silently
+  rewrites authored bytes; formatters stay manual).
+- Removed dead CI badge from README (GitHub Actions stopped estate-wide).
 
 ## [0.3.2] - 2026-10-11
 
